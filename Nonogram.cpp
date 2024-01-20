@@ -3,6 +3,8 @@
 
 const size_t LEVELFIRST = 7;
 const int HINTSCOUNT = 2;
+const int EMPTY = -1;
+const int FILLED = 1;
 void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size);
 bool found(const char* playersName, const char* name)
 {
@@ -57,7 +59,7 @@ void print(int matrix[][LEVELFIRST], const int size)//napravi da e s size of lv 
 	{
 		for (int j = 0; j < size; j++)
 		{
-			if (matrix[i][j] == -1)
+			if (matrix[i][j] == EMPTY || matrix[i][j] == -2)
 			{
 				std::cout << " ";
 			}
@@ -117,11 +119,11 @@ bool isValidIndex(const int i, const int j, const int size)
 }
 bool isFilled(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size - HINTSCOUNT; i++)
 	{
-		for (int j = 0; j < size; j++)
+		for (int j = 0; j < size - HINTSCOUNT; j++)
 		{
-			if (matrix[i][j] != answer[i][j])
+			if (matrix[i + HINTSCOUNT][j + HINTSCOUNT] != answer[i + HINTSCOUNT][j + HINTSCOUNT])
 				return false;
 		}
 	}
@@ -131,63 +133,125 @@ bool isValidNum(char a)
 {
 	return (a > '0' && a < '9');
 }
+void checkForFullRow(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int rowIndx)
+{
+	bool filledRow = true;
+	for (int j = 0; j < size - HINTSCOUNT; j++)
+	{
+		if (answer[rowIndx][j + HINTSCOUNT] == FILLED && matrix[rowIndx][j + HINTSCOUNT] != FILLED)
+		{
+			filledRow = false;
+			break;
+		}
+	}
+
+	if (filledRow == true)
+	{
+		for (int j = 0; j < size - HINTSCOUNT; j++)
+		{
+			if (matrix[rowIndx][j + HINTSCOUNT] == EMPTY)
+			{
+				matrix[rowIndx][j + HINTSCOUNT] = 0;
+				print(matrix, size);
+			}
+		}
+	}
+}
+void checkForFullColumn(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int colIndx)
+{
+	bool filledCol = true;
+	for (int i = 0; i < size - HINTSCOUNT; i++)
+	{
+		if (answer[i + HINTSCOUNT][colIndx] == FILLED && matrix[i + HINTSCOUNT][colIndx] != FILLED)
+		{
+			filledCol = false;
+			break;
+		}
+	}
+
+	if (filledCol == true)
+	{
+		for (int i = 0; i < size - HINTSCOUNT; i++)
+		{
+			if (matrix[i + HINTSCOUNT][colIndx] == EMPTY)
+			{
+				matrix[i + HINTSCOUNT][colIndx] = 0;
+			}
+		}
+	}
+}
+void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives);
+int playAgain(char answer)
+{
+	if (answer == 'Y' || answer == 'y') return 1;
+	else if (answer == 'N' || answer == 'n') return 0;
+	else return -1;
+}
 void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives)//size->rows,cols ako ne e kvadratna
 {
 	
-	if (lives <= 0)//krai
+	if (lives <= 0)//lost all lives
 	{
 		char answ;
 		std::cout << "No more lives! Do you want to play more? Y/N\n";
 		std::cin >> answ;
-		if (answ == 'Y' || answ == 'y')
+
+		switch (playAgain(answ))
 		{
-			start(name, matrix, answer, size);
-		}
-		else if (answ == 'N' || answ == 'n')
-		{
-			return;
-		}
-		else
-		{
-			std::cout << "Incorrect input!";
-			getInput(name, matrix, answer, size, lives);
+		case 1:start(name, matrix, answer, size); break;
+		case 0:std::cout << "You chose to end the game!"; return; break;
+		case -1:std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
 		}
 
 	}
-	if (isFilled(matrix, answer, size))//kato trqbva da se dobavi zapulvaneto avtomatichno s nuli
+
+	if (isFilled(matrix, answer, size))//filled the whole nonogram
 	{
-		std::cout << "Done! Congratulations you completed the level\n";//i kakvo stava
+		std::cout << "Done! Congratulations you completed the level\n";
+		char answ;
+		std::cout << "No more lives! Do you want to play more? Y/N\n";
+		std::cin >> answ;
+
+		switch (playAgain(answ))
+		{
+		case 1:start(name, matrix, answer, size); break;
+		case 0:std::cout << "You chose to end the game!"; return; break;
+		case -1:std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
+		}
+		
+		print(matrix, size);
+		start(name, matrix, answer, size);
+		std::cout << std::endl;
 		return;
 	}
 
-	/*char inputI = 0;
-	char inputJ = 0;*/
+	
 	int i = 0;
 	int j = 0;
+
 	print(matrix, size);
 	std::cin >> i >> j;
+
 	//validation!!!!
-	/*if (!isValidNum(inputI) || !isValidNum(inputJ))
-	{
-		i = inputI - '0';
-		j = inputJ - '0';
-	}*/
 
 	if (!isValidIndex(i + HINTSCOUNT, j + HINTSCOUNT, size))
 	{
 		std::cout << "Invalid Input! Try again: \n";
 	}
-	else if (matrix[i + HINTSCOUNT][j + HINTSCOUNT] != -1)//hintsCount opravi
+	else if (matrix[i + HINTSCOUNT][j + HINTSCOUNT] != EMPTY)
 	{
 		std::cout << "Cell is already filled! Try again: \n";
 	}
 	else
 	{
 		//matrix[i + HINTSCOUNT][j + HINTSCOUNT] = num;
-		if (answer[i + HINTSCOUNT][j + HINTSCOUNT] == 1)
-		{            //ako e zapulnen reda
-			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = 1;//const
+		if (answer[i + HINTSCOUNT][j + HINTSCOUNT] == FILLED)
+		{
+			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = FILLED;//const
 			std::cout << "Correct guess! Cell filled!\n";
+
+			checkForFullRow(matrix, answer, size, i + HINTSCOUNT);
+			checkForFullColumn(matrix, answer, size, j + HINTSCOUNT);
 		}
 		else
 		{
@@ -195,8 +259,8 @@ void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], co
 			std::cout << "Incorrect! The cell is empty. Lives left: " << --lives << std::endl;
 		}
 	}
-	getInput(name, matrix, answer, size, lives);
 
+	getInput(name, matrix, answer, size, lives);
 }
 
 
@@ -207,21 +271,21 @@ void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const
 	char input;
 	int level = 1;
 	int maxLevel = searchForPlayer(name);
-	std::cin >> input;//validaciq na vhoda pomisli 
+	std::cin >> input;//validaciq na vhoda pomisli samo da e vutre
 	level = input - '0';
+
 	if (!isValidNum(input))
 	{
 		std::cout << "Incorrect input!\n";
 		start(name, matrix, answer, size);
 	}
+
 	else if (level > maxLevel)
 	{
 		std::cout << "You cant reach that level!\n";
 		start(name, matrix, answer, size);
 	}
-	
-	
-	
+
 	create(matrix, size, level);
 	create(answer, size, level * 10);
 
