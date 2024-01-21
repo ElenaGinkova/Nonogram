@@ -221,6 +221,44 @@ int playAgain(char answer)
 	else if (answer == 'N' || answer == 'n') return 0;
 	else return -1;
 }
+void finishedLevel(char* namePlayer)
+{
+	const int FILESIZE = 600;
+	std::ifstream inputFile;
+	std::ofstream outputFile;
+
+	inputFile.open("Names.txt");
+	
+	char name[MAXINPUT];
+	char file[FILESIZE]{};
+	char level[4];
+
+	if (inputFile.is_open())
+	{
+		while (inputFile >> name)
+		{
+			myStrcat(file, name);
+			level[0] = ' ';
+			inputFile >> level[1];
+
+			if (found(namePlayer, name))
+			{
+				level[1]++;
+			}
+			level[2] = '\n';
+			level[3] = '\0';
+			myStrcat(file, level);
+		}
+		inputFile.close();
+		outputFile.open("Names.txt");
+		outputFile << file;
+	}
+	else
+	{
+		std::cout << "Coudn't open the file.\n";
+	}
+	outputFile.close();
+}
 void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives)//size->rows,cols ako ne e kvadratna
 {
 	
