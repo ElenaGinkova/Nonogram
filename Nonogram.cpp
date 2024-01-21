@@ -15,6 +15,10 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include "Found.h"
+#include "NewPlayer.h"
+#include "StrFunctions.h"
+
 
 const size_t MAXSIZELEVEL = 11;
 const size_t CELLS = 6;
@@ -24,20 +28,7 @@ const int FILLED = 1;
 const int MAXINPUT = 300;
 
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size);
-bool found(const char* playersName, const char* name)
-{
-	while (*name != '\0' && *playersName != '\0')
-	{
-		if (*name != *playersName)
-		{
-			return false;
-		}
-		name++;
-		playersName++;
-	}
-	return (*playersName == '\0' && *name == '\0');
-}
-int searchForPlayer(char* playersName)
+int searchForPlayerLevel(char* playersName)//returns the level of the player
 {
 	char name[MAXINPUT];
 	int level = 0;
@@ -62,14 +53,6 @@ int searchForPlayer(char* playersName)
 	inputFile.close();
 	return 0;
 	
-}
-void newPlayer(char* playersName)
-{
-	std::ofstream outFile;
-	outFile.open("Names.txt", std::ios_base::app);
-	outFile << playersName << " 1 3\n";
-	std::cout << "Player " << playersName << " was added successfully!\n";
-	outFile.close();
 }
 void print(int matrix[][MAXSIZELEVEL],  int size)
 {
@@ -109,41 +92,7 @@ void print(int matrix[][MAXSIZELEVEL],  int size)
 		std::cout << "\n";
 	}
 }
-unsigned myStrlen(char* str)
-{
-	if (!str)
-		return 0;
-
-	unsigned result = 0;
-	while (*str)
-	{
-		result++;
-		str++;
-	}
-	return result;
-}
-void myStrcpy(char* source, char* dest)
-{
-	if (!source || !dest)
-		return;
-	while (*source)
-	{
-		*dest = *source;
-		dest++;
-		source++;
-	}
-	*dest = '\0';
-}
-void myStrcat(char* first, char* second)
-{
-	if (!first || !second)
-		return;
-
-	size_t firstLen = myStrlen(first);
-	first += firstLen;
-	myStrcpy(second, first);
-}
-void create(char* name, int matrix[][MAXSIZELEVEL],  int size, int toOpen)
+void create(char* name, int matrix[][MAXSIZELEVEL],  int size, int toOpen)//creating matrixes for each level when level is entered
 {
 	std::ifstream inputFile;
 
@@ -260,7 +209,7 @@ bool isValidLevel(int a)//there are only 5 levels
 {
 	return (a > 0 && a < 6);
 }
-void checkForFullRow(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int rowIndx)
+void checkForFullRow(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int rowIndx)//if all filleed cells have been found then filling the empty ones in this row
 {
 	bool filledRow = true;
 	for (int j = 0; j < size - HINTSCOUNT; j++)
@@ -283,7 +232,7 @@ void checkForFullRow(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  in
 		}
 	}
 }
-void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int colIndx)
+void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int colIndx)//if all filleed cells have been found then filling the empty ones in this column
 {
 	bool filledCol = true;
 	for (int i = 0; i < size - HINTSCOUNT; i++)
@@ -306,7 +255,7 @@ void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], 
 		}
 	}
 }
-void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives);
+void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives);
 int playAgain(char answer)
 {
 	if (answer == 'Y' || answer == 'y') return 1;
@@ -351,19 +300,6 @@ void finishedLevel(char* namePlayer)
 	}
 	outputFile.close();
 }
-int myStrcmp(const char* first, const char* second)
-{
-	if (!first || !second)
-		return 0; 
-	while ((*first) && (*second) && ((*first) == (*second))) 
-	{
-		first++;
-		second++;
-	}
-
-	return (*first - *second);
-
-}
 void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size, int lives)
 {
 	char answ[MAXINPUT];
@@ -379,7 +315,7 @@ void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], in
 	{
 		std::cout << "Continue playing\n";
 		std::cin.ignore(MAXINPUT, '\n');
-		getInput(name, matrix, answer, size, lives);
+		play(name, matrix, answer, size, lives);
 	}
 	else
 	{
@@ -388,7 +324,7 @@ void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], in
 		quit(name, matrix, answer, size, lives);
 	}
 }
-void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives)//size
+void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives)//the function is used while gameplay in a certain level 
 {
 	
 	if (lives <= 0)//lost all lives
@@ -401,7 +337,7 @@ void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL]
 		{
 		case 1:start(name, matrix, answer, size); break;
 		case 0:std::cout << "You chose to end the game!"; return; break;
-		case -1:std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
+		case -1:std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives); break;
 		}
 
 	}
@@ -410,9 +346,9 @@ void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL]
 	{
 		std::cout << "Done! Congratulations you completed the level\n";
 		char answ;
-		int reachedLevel = searchForPlayer(name) + 1;
+		int reachedLevel = searchForPlayerLevel(name) + 1;
 
-		if (reachedLevel != 6)//there are only 5 levels checking if the player have went trough all of them
+		if (reachedLevel != 6)//there are only 5 levels checking if the player have went trough all of them and if not then increasinf the level
 		{
 			finishedLevel(name);
 		}
@@ -425,7 +361,7 @@ void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL]
 		{
 		case 1: start(name, matrix, answer, size); break;
 		case 0: std::cout << "You chose to end the game!"; return; break;
-		case -1: std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
+		case -1: std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives); break;
 		}
 		
 		print(matrix, size);
@@ -433,15 +369,14 @@ void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL]
 		std::cout << std::endl;
 		return;
 	}
-
-	
+	//the coordinates of the cell the player want to fill in
 	int i = 0;
 	int j = 0;
 
 	print(matrix, size);
 	std::cin >> i;
 
-	if (i == -1)
+	if (i == -1)//player decides to quit the level
 	{
 		quit(name, matrix, answer, size, lives);	
 	}
@@ -479,7 +414,7 @@ void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL]
 		}
 	}
 
-	getInput(name, matrix, answer, size, lives);
+	play(name, matrix, answer, size, lives);
 }
 int playerlives(char* playersname)
 {
@@ -534,17 +469,17 @@ int playerLevelContinue(char* playersName)
 	inputFile.close();
 	return 0;
 }
-void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)
+void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)//the function is used every time the player wants to start a level
 {
 	int level = 1;
 	char lv;
 	int lives = 3;
 	std::cout << "Which level?\n";
 	
-	int maxLevel = searchForPlayer(name);
-
+	int maxLevel = searchForPlayerLevel(name);
 	std::cin >> lv;
 	level = lv - '0';
+
 	if (!isValidLevel(level))
 	{
 		std::cout << "There is no such level!\n";
@@ -564,27 +499,23 @@ void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], i
 
 	level = level * 10 + version;
 	
-	create(name, matrix, size, level);
-	create(name,answer, size, level * 10);
+	create(name, matrix, size, level);//the matrix that the player is gonna use
+	create(name,answer, size, level * 10);//the matrix filled with the right answers
 
-	getInput(name, matrix, answer, size, lives);
+	play(name, matrix, answer, size, lives);
 }
 
 int main()
 {
-	
 	char playersName[MAXINPUT] = "";
-
 	int matrix[MAXSIZELEVEL][MAXSIZELEVEL] = {};
 	int answer[MAXSIZELEVEL][MAXSIZELEVEL] = {};
 
 	std::cout << "Welcome to Nonogram!\nIf you would like to exit a level please type -1\nEnter the name of a player: ";
 	std::cin >> playersName;
-
 	int level = 1;
-
 	
-	if (level = searchForPlayer(playersName))
+	if (level = searchForPlayerLevel(playersName))//if the function returns a level then the int variable will take the the value and the if will be performed
 	{
 		std::cout << "Player " << playersName << " was found!\n" << "Your level is " << level << ":\n";
 	}
