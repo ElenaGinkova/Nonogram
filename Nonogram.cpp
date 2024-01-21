@@ -272,6 +272,30 @@ int myStrcmp(const char* first, const char* second)
 	return (*first - *second);
 
 }
+void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size, int lives)
+{
+	char answ[MAXINPUT];
+	std::cout << "Do you really want to exit the level? [Y/N]\n";
+	std::cin >> answ;
+	if ((!myStrcmp(answ, "Y")) || (!myStrcmp(answ, "y")))
+	{
+		std::cout << "Level exited\n";
+		std::cin.ignore(MAXINPUT, '\n');
+		start(name, matrix, answer, size);
+	}
+	else if ((!myStrcmp(answ, "N")) || (!myStrcmp(answ, "n")))
+	{
+		std::cout << "Continue playing\n";
+		std::cin.ignore(MAXINPUT, '\n');
+		getInput(name, matrix, answer, size, lives);
+	}
+	else
+	{
+		std::cout << "Incorrect input";
+		std::cin.ignore(MAXINPUT, '\n');
+		quit(name, matrix, answer, size, lives);
+	}
+}
 
 void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives)//size->rows,cols ako ne e kvadratna
 {
