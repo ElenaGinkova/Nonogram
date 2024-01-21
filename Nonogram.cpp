@@ -83,6 +83,40 @@ void print(int matrix[][LEVELFIRST], const int size)//napravi da e s size of lv 
 		std::cout << "\n";
 	}
 }
+unsigned myStrlen(char* str)
+{
+	if (!str)
+		return 0;
+
+	unsigned result = 0;
+	while (*str)
+	{
+		result++;
+		str++;
+	}
+	return result;
+}
+void myStrcpy(char* source, char* dest)
+{
+	if (!source || !dest)
+		return;
+	while (*source)
+	{
+		*dest = *source;
+		dest++;
+		source++;
+	}
+	*dest = '\0';
+}
+void myStrcat(char* first, char* second)
+{
+	if (!first || !second)
+		return;
+
+	size_t firstLen = myStrlen(first);
+	first += firstLen;
+	myStrcpy(second, first);
+}
 void create(int matrix[][LEVELFIRST], const int size, int toOpen)//napravi da e s size of lv 5
 {
 	std::ifstream inputFile;
