@@ -259,6 +259,20 @@ void finishedLevel(char* namePlayer)
 	}
 	outputFile.close();
 }
+int myStrcmp(const char* first, const char* second)
+{
+	if (!first || !second)
+		return 0; 
+	while ((*first) && (*second) && ((*first) == (*second))) 
+	{
+		first++;
+		second++;
+	}
+
+	return (*first - *second);
+
+}
+
 void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives)//size->rows,cols ako ne e kvadratna
 {
 	
