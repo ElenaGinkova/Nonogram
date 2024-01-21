@@ -398,6 +398,33 @@ int playerlives(char* playersname)
 	inputfile.close();
 	return 0;
 }
+int playerLevelContinue(char* playersName)
+{
+	char buff[MAXINPUT];
+	int level = 0;
+	std::ifstream inputFile;
+	inputFile.open("Names.txt");
+	if (inputFile.is_open())
+	{
+		while (inputFile >> buff)
+		{
+			if (found(playersName, buff))
+			{
+				inputFile >> buff;
+				inputFile >> buff;
+				inputFile >> level;
+				inputFile.close();
+				return level;
+			}
+		}
+	}
+	else
+	{
+		std::cout << "Coudn't open the file.\n";
+	}
+	inputFile.close();
+	return 0;
+}
 
 
 void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size)
