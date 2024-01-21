@@ -1,11 +1,29 @@
+/**
+*
+* Solution to course project #9
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2023/2024
+*
+* @author Elena Ginkova
+* @idnumber 1MI0600289* @compiler VC
+*
+* <file with helper functions>
+*
+*/
+
 #include <iostream>
 #include <fstream>
+#include <random>
 
-const size_t LEVELFIRST = 7;
+const size_t MAXSIZELEVEL = 11;
+const size_t CELLS = 6;
 const int HINTSCOUNT = 2;
 const int EMPTY = -1;
 const int FILLED = 1;
-void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size);
+const int MAXINPUT = 300;
+
+void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size);
 bool found(const char* playersName, const char* name)
 {
 	while (*name != '\0' && *playersName != '\0')
@@ -21,7 +39,7 @@ bool found(const char* playersName, const char* name)
 }
 int searchForPlayer(char* playersName)
 {
-	char name[256];
+	char name[MAXINPUT];
 	int level = 0;
 	std::ifstream inputFile;
 	inputFile.open("Names.txt");
@@ -49,11 +67,11 @@ void newPlayer(char* playersName)
 {
 	std::ofstream outFile;
 	outFile.open("Names.txt", std::ios_base::app);
-	outFile << playersName << " 1\n";
+	outFile << playersName << " 1 3\n";
 	std::cout << "Player " << playersName << " was added successfully!\n";
 	outFile.close();
 }
-void print(int matrix[][LEVELFIRST], const int size)//napravi da e s size of lv 5//tuk e specialno za lv1
+void print(int matrix[][MAXSIZELEVEL],  int size)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -67,7 +85,7 @@ void print(int matrix[][LEVELFIRST], const int size)//napravi da e s size of lv 
 			{
 				std::cout << matrix[i][j];
 			}
-			if (j == 1 && i > 1)//za vs lvl razl
+			if (j == 1 && i > 1)
 			{
 				std::cout << '|';
 			}
@@ -78,7 +96,15 @@ void print(int matrix[][LEVELFIRST], const int size)//napravi da e s size of lv 
 		}
 		if (i == 1)
 		{
-			std::cout << "\n---------------------";//da se opravi za vs level
+			switch (size)
+			{
+			case 7:std::cout << "\n---------------"; break;//lv1
+			case 8:std::cout << "\n-----------------"; break;//lv2
+			case 9:std::cout << "\n-------------------"; break;//lv3
+			case 10:std::cout << "\n---------------------"; break;//lv4
+			case 11:std::cout << "\n-----------------------"; break;//lv5
+			}
+			
 		}
 		std::cout << "\n";
 	}
@@ -117,28 +143,95 @@ void myStrcat(char* first, char* second)
 	first += firstLen;
 	myStrcpy(second, first);
 }
-void create(int matrix[][LEVELFIRST], const int size, int toOpen)//napravi da e s size of lv 5
+void create(char* name, int matrix[][MAXSIZELEVEL],  int size, int toOpen)
 {
 	std::ifstream inputFile;
-	switch (toOpen)//switch za levela
-	{
-	 case 1:
-		 inputFile.open("Template.txt"); break;
-	 case 10:
-		 inputFile.open("Answer.txt"); break;
-	}
-	
-	
+
+		switch (toOpen)
+		{
+		//level 1
+		 case 10://version 1
+			 inputFile.open("TemplateLv1.1.txt"); break;
+		 case 100://version 1 answers
+			 inputFile.open("AnswerLv1.1.txt"); break;
+
+		 case 11://version 2
+			 inputFile.open("TemplateLv1.2.txt"); break;
+		 case 110://version 2 answers
+			 inputFile.open("AnswerLv1.2.txt"); break;
+
+		//level 2
+		 case 20://version 1
+			 inputFile.open("TemplateLv2.1.txt"); break;
+		 case 200://version 1 answers
+			 inputFile.open("AnswerLv2.1.txt"); break;
+
+		 case 21://version 2
+			 inputFile.open("TemplateLv2.2.txt"); break;
+		 case 210://version 2 answers
+			 inputFile.open("AnswerLv2.2.txt"); break;
+
+		//level 3	
+		 case 30://version 1
+			 inputFile.open("TemplateLv3.1.txt"); break;
+		 case 300://version 1 answers
+			 inputFile.open("AnswerLv3.1.txt"); break;
+
+		 case 31://version 2
+			 inputFile.open("TemplateLv3.2.txt"); break;
+		 case 310://version 2 answers
+			 inputFile.open("AnswerLv3.2.txt"); break;
+
+		//level 4
+		 case 40://version 1
+			 inputFile.open("TemplateLv4.1.txt"); break;
+		 case 400://version 1 answers
+			 inputFile.open("AnswerLv4.1.txt"); break;
+
+		 case 41://version 2
+			 inputFile.open("TemplateLv4.2.txt"); break;
+		 case 410://version 2 answers
+			 inputFile.open("AnswerLv4.2.txt"); break;
+
+		//level 5
+		 case 50://version 1
+			 inputFile.open("TemplateLv5.1.txt"); break;
+		 case 500://version 1 answers
+			 inputFile.open("AnswerLv5.1.txt"); break;
+
+		 case 51://version 2
+			 inputFile.open("TemplateLv5.2.txt"); break;
+		 case 510://version 2 answers
+			 inputFile.open("AnswerLv5.2.txt"); break;
+	    }
+
 	if (inputFile.is_open())
 	{
 		int num = 0;
-		for (int i = 0; i < size; i++)//spcialno za lv1 e
+		for (int i = 0; i < size; i++)
 		{
 			for (int j = 0; j < size; j++)
 			{
 				inputFile >> matrix[i][j];
 			}
 		}
+		for (int i = 0; i < MAXSIZELEVEL; i++)
+		{
+			for (int j = size; j < MAXSIZELEVEL; j++)
+			{
+				if(matrix[i][j] == 0)
+				matrix[i][j] = -1;
+			}
+		}
+		for (int i = size; i < MAXSIZELEVEL; i++)
+		{
+			for (int j = 0; j < MAXSIZELEVEL; j++)
+			{
+				if (matrix[i][j] == 0)
+					matrix[i][j] = -1;
+			}
+		}
+		
 	}
 	else
 	{
@@ -147,11 +240,11 @@ void create(int matrix[][LEVELFIRST], const int size, int toOpen)//napravi da e 
 	
 	inputFile.close();
 }
-bool isValidIndex(const int i, const int j, const int size)
+bool isValidIndex(const int i, const int j,  int size)
 {
-	return (i > 0 && j > 0 && i < size && j < size);
+	return (i > 1 && j > 1 && i < size && j < size);
 }
-bool isFilled(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size)
+bool isFilled(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size)
 {
 	for (int i = 0; i < size - HINTSCOUNT; i++)
 	{
@@ -163,11 +256,11 @@ bool isFilled(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size
 	}
 	return true;
 }
-bool isValidNum(char a)
+bool isValidLevel(int a)//there are only 5 levels
 {
-	return (a > '0' && a < '9');
+	return (a > 0 && a < 6);
 }
-void checkForFullRow(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int rowIndx)
+void checkForFullRow(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int rowIndx)
 {
 	bool filledRow = true;
 	for (int j = 0; j < size - HINTSCOUNT; j++)
@@ -186,12 +279,11 @@ void checkForFullRow(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const i
 			if (matrix[rowIndx][j + HINTSCOUNT] == EMPTY)
 			{
 				matrix[rowIndx][j + HINTSCOUNT] = 0;
-				print(matrix, size);
 			}
 		}
 	}
 }
-void checkForFullColumn(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int colIndx)
+void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int colIndx)
 {
 	bool filledCol = true;
 	for (int i = 0; i < size - HINTSCOUNT; i++)
@@ -214,7 +306,7 @@ void checkForFullColumn(int matrix[][LEVELFIRST], int answer[][LEVELFIRST], cons
 		}
 	}
 }
-void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives);
+void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives);
 int playAgain(char answer)
 {
 	if (answer == 'Y' || answer == 'y') return 1;
@@ -296,8 +388,7 @@ void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], in
 		quit(name, matrix, answer, size, lives);
 	}
 }
-
-void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size, int& lives)//size->rows,cols ako ne e kvadratna
+void getInput(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives)//size
 {
 	
 	if (lives <= 0)//lost all lives
@@ -319,14 +410,22 @@ void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], co
 	{
 		std::cout << "Done! Congratulations you completed the level\n";
 		char answ;
-		std::cout << "No more lives! Do you want to play more? Y/N\n";
+		int reachedLevel = searchForPlayer(name) + 1;
+
+		if (reachedLevel != 6)//there are only 5 levels checking if the player have went trough all of them
+		{
+			finishedLevel(name);
+		}
+		
+		print(matrix, size);
+		std::cout << "Do you want to play more? Y/N\n";
 		std::cin >> answ;
 
 		switch (playAgain(answ))
 		{
-		case 1:start(name, matrix, answer, size); break;
-		case 0:std::cout << "You chose to end the game!"; return; break;
-		case -1:std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
+		case 1: start(name, matrix, answer, size); break;
+		case 0: std::cout << "You chose to end the game!"; return; break;
+		case -1: std::cout << "Incorrect input!"; getInput(name, matrix, answer, size, lives); break;
 		}
 		
 		print(matrix, size);
@@ -340,9 +439,19 @@ void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], co
 	int j = 0;
 
 	print(matrix, size);
-	std::cin >> i >> j;
+	std::cin >> i;
 
-	//validation!!!!
+	if (i == -1)
+	{
+		quit(name, matrix, answer, size, lives);	
+	}
+		
+	std::cin >> j;
+
+	if (j == -1)
+	{
+		quit(name, matrix, answer, size, lives);
+	}
 
 	if (!isValidIndex(i + HINTSCOUNT, j + HINTSCOUNT, size))
 	{
@@ -352,12 +461,12 @@ void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], co
 	{
 		std::cout << "Cell is already filled! Try again: \n";
 	}
-	else
+	else 
 	{
-		//matrix[i + HINTSCOUNT][j + HINTSCOUNT] = num;
+		
 		if (answer[i + HINTSCOUNT][j + HINTSCOUNT] == FILLED)
 		{
-			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = FILLED;//const
+			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = FILLED;
 			std::cout << "Correct guess! Cell filled!\n";
 
 			checkForFullRow(matrix, answer, size, i + HINTSCOUNT);
@@ -425,52 +534,57 @@ int playerLevelContinue(char* playersName)
 	inputFile.close();
 	return 0;
 }
-
-
-void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size)
+void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)
 {
+	int level = 1;
+	char lv;
 	int lives = 3;
 	std::cout << "Which level?\n";
-	char input;
-	int level = 1;
+	
 	int maxLevel = searchForPlayer(name);
-	std::cin >> input;//validaciq na vhoda pomisli samo da e vutre
-	level = input - '0';
 
-	if (!isValidNum(input))
+	std::cin >> lv;
+	level = lv - '0';
+	if (!isValidLevel(level))
 	{
-		std::cout << "Incorrect input!\n";
+		std::cout << "There is no such level!\n";
+		std::cin.ignore(MAXINPUT, '\n');
 		start(name, matrix, answer, size);
 	}
-
 	else if (level > maxLevel)
 	{
-		std::cout << "You cant reach that level!\n";
+		std::cout << "Your level: " << maxLevel << "\nTrying to reach level: " << level << "\nYou cant reach that level!\n";
 		start(name, matrix, answer, size);
 	}
+	
+	size = CELLS + level;
 
-	create(matrix, size, level);
-	create(answer, size, level * 10);
+	srand(time(nullptr));//changing the seed if rand with time to get different numbers
+	int version = rand() % 2;//gennerating 0 or 1
 
-	getInput(name, matrix, answer, LEVELFIRST, lives);
+	level = level * 10 + version;
+	
+	create(name, matrix, size, level);
+	create(name,answer, size, level * 10);
+
+	getInput(name, matrix, answer, size, lives);
 }
 
 int main()
 {
-	const size_t SIZE = 256;
-	char playersName[SIZE] = "";
+	
+	char playersName[MAXINPUT] = "";
 
-	int matrix[LEVELFIRST][LEVELFIRST] = {};//za 1 lv//trqbva da se suobrazi razmera s levela
-	int answer[LEVELFIRST][LEVELFIRST] = {};//za 1 lv//trqbva da se suobrazi razmera s levela
+	int matrix[MAXSIZELEVEL][MAXSIZELEVEL] = {};
+	int answer[MAXSIZELEVEL][MAXSIZELEVEL] = {};
 
-	std::cout << "Welcome to Nonogram!\n" << "Enter the name of the player: ";
+	std::cout << "Welcome to Nonogram!\nIf you would like to exit a level please type -1\nEnter the name of a player: ";
 	std::cin >> playersName;
 
-	char name[SIZE];
 	int level = 1;
 
 	
-	if (level = searchForPlayer(playersName))//izbirane na lv
+	if (level = searchForPlayer(playersName))
 	{
 		std::cout << "Player " << playersName << " was found!\n" << "Your level is " << level << ":\n";
 	}
@@ -479,5 +593,5 @@ int main()
 		newPlayer(playersName);
 	}
 
-	start(playersName, matrix, answer, LEVELFIRST);//napravi da stava i za drgite niva//nz za size
+	start(playersName, matrix, answer, MAXSIZELEVEL);
 }
