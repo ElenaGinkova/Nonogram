@@ -372,6 +372,32 @@ void getInput(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], co
 
 	getInput(name, matrix, answer, size, lives);
 }
+int playerlives(char* playersname)
+{
+	char buff[MAXINPUT];
+	int lives = 0;
+	std::ifstream inputfile;
+	inputfile.open("Names.txt");
+	if (inputfile.is_open())
+	{
+		while (inputfile >> buff)
+		{
+			if (found(playersname, buff))
+			{
+				inputfile >> buff;
+				inputfile >> lives;
+				inputfile.close();
+				return lives;
+			}
+		}
+	}
+	else
+	{
+		std::cout << "coudn't open the file.\n";
+	}
+	inputfile.close();
+	return 0;
+}
 
 
 void start(char* name, int matrix[][LEVELFIRST], int answer[][LEVELFIRST], const int size)
