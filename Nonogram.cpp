@@ -470,16 +470,33 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 	play(name, matrix, answer, size, lives, levelVersion);
 }
 
-
+bool emptyFile(char* name)
+{
+	std::ifstream inFile;
+	inFile.open(name);
+	int num = 0;
+	if (inFile.is_open())
+	{
+		inFile >> num;
+	}
+	inFile.close();
+	return (num == 0);
+}
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)//the function is used every time the player wants to start a level
 {
 	int level = 1;
 	char lv;
 	int lives = 3;
-	std::cout << "Do you want to continue[C] your last saved level or start a new one[N]? [C/N]\n";
+	int maxLevel = searchForPlayerLevel(name);
+	char choice = 'n';
 
-	char choice;
-	std::cin >> choice;
+	if (!emptyFile(name))
+	{
+		std::cout << "Do you want to continue[C] your last saved level or start a new one[N]? \n[C/N]\n";
+		std::cin >> choice;
+	}
+		
+	
 
 	if (choice == 'C' || choice == 'c')
 	{
@@ -489,7 +506,7 @@ void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], i
 	{
 		std::cout << "Which level?\n";
 
-		int maxLevel = searchForPlayerLevel(name);
+		
 		std::cin >> level;
 
 		if (!isValidLevel(level))
@@ -511,9 +528,8 @@ void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], i
 
 		level = level * 10 + version;
 
-		create(name, matrix, size, level);//the matrix that the player is gonna use
+		create(name, matrix, size, level);//the matrix that the player is going to use
 		create(name, answer, size, level * 10);//the matrix filled with the right answers
-
 	}
 	else
 	{
