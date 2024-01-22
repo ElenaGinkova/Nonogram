@@ -19,7 +19,6 @@
 #include "NewPlayer.h"
 #include "StrFunctions.h"
 
-
 const size_t MAXSIZELEVEL = 11;
 const size_t CELLS = 6;
 const int HINTSCOUNT = 2;
@@ -28,6 +27,7 @@ const int FILLED = 1;
 const int MAXINPUT = 300;
 
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size);
+void create(char* name, int matrix[][MAXSIZELEVEL], int size, int toOpen);
 int searchForPlayerLevel(char* playersName)//returns the level of the player
 {
 	char name[MAXINPUT];
@@ -53,6 +53,55 @@ int searchForPlayerLevel(char* playersName)//returns the level of the player
 	inputFile.close();
 	return 0;
 	
+}
+int readProgress(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)//returns the remaining lives
+{
+	int levelVersion = 1;
+	int lives = 1;
+	char filename[MAXINPUT]{};
+	std::ifstream inFile;
+	inFile.open(name);
+
+	
+	if (inFile.is_open())
+	{
+		inFile >> levelVersion;
+		inFile >> lives;
+
+		for (int i = 0; i < MAXSIZELEVEL; i++)
+		{
+			for (int j = 0; j < MAXSIZELEVEL; j++)
+			{
+				inFile >> matrix[i][j];
+			}
+		}
+	}
+	else
+	{
+		std::cout << "Coudn't open the file.\n";
+	}
+	inFile.close();
+
+	create(name, answer, size, levelVersion * 10);//the matrix filled with the right answers
+	return lives;
+}
+void saveProgress(int lives, char* name, int matrix[][MAXSIZELEVEL], int size, int levelVersion)//saves the progress of the last quit
+{
+
+	std::ofstream outFile;
+	outFile.open(name);
+
+	outFile << levelVersion << " " << lives << std::endl;
+	for (int i = 0; i < MAXSIZELEVEL; i++)
+	{
+		for (int j = 0; j < MAXSIZELEVEL - 1; j++)
+		{
+			outFile << matrix[i][j] << " ";
+		}
+		outFile << matrix[i][MAXSIZELEVEL - 1] << std::endl;
+	}
+	
+	outFile.close();
 }
 void print(int matrix[][MAXSIZELEVEL],  int size)
 {
@@ -255,7 +304,8 @@ void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], 
 		}
 	}
 }
-void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives);
+void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int lives, int levelVersion);
+
 int playAgain(char answer)
 {
 	if (answer == 'Y' || answer == 'y') return 1;
@@ -300,44 +350,47 @@ void finishedLevel(char* namePlayer)
 	}
 	outputFile.close();
 }
-void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size, int lives)
+
+void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size, int lives, int levelVersion)
 {
-	char answ[MAXINPUT];
+	char choice[MAXINPUT];
 	std::cout << "Do you really want to exit the level? [Y/N]\n";
-	std::cin >> answ;
-	if ((!myStrcmp(answ, "Y")) || (!myStrcmp(answ, "y")))
+	std::cin >> choice;
+	if ((!myStrcmp(choice, "Y")) || (!myStrcmp(choice, "y")))
 	{
+
+		saveProgress(lives, name, matrix, size, levelVersion);
 		std::cout << "Level exited\n";
 		std::cin.ignore(MAXINPUT, '\n');
 		start(name, matrix, answer, size);
 	}
-	else if ((!myStrcmp(answ, "N")) || (!myStrcmp(answ, "n")))
+	else if ((!myStrcmp(choice, "N")) || (!myStrcmp(choice, "n")))
 	{
 		std::cout << "Continue playing\n";
 		std::cin.ignore(MAXINPUT, '\n');
-		play(name, matrix, answer, size, lives);
+		play(name, matrix, answer, size, lives, levelVersion);
 	}
 	else
 	{
 		std::cout << "Incorrect input";
 		std::cin.ignore(MAXINPUT, '\n');
-		quit(name, matrix, answer, size, lives);
+		quit(name, matrix, answer, size, lives, levelVersion);
 	}
 }
-void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int& lives)//the function is used while gameplay in a certain level 
+void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int lives, int levelVersion)//the function is used while gameplay in a certain level 
 {
 	
 	if (lives <= 0)//lost all lives
 	{
-		char answ;
+		char choice;
 		std::cout << "No more lives! Do you want to play more? Y/N\n";
-		std::cin >> answ;
+		std::cin >> choice;
 
-		switch (playAgain(answ))
+		switch (playAgain(choice))
 		{
 		case 1:start(name, matrix, answer, size); break;
 		case 0:std::cout << "You chose to end the game!"; return; break;
-		case -1:std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives); break;
+		case -1:std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives, levelVersion); break;
 		}
 
 	}
@@ -345,7 +398,7 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 	if (isFilled(matrix, answer, size))//filled the whole nonogram
 	{
 		std::cout << "Done! Congratulations you completed the level\n";
-		char answ;
+		char choice;
 		int reachedLevel = searchForPlayerLevel(name) + 1;
 
 		if (reachedLevel != 6)//there are only 5 levels checking if the player have went trough all of them and if not then increasinf the level
@@ -355,13 +408,13 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 		
 		print(matrix, size);
 		std::cout << "Do you want to play more? Y/N\n";
-		std::cin >> answ;
+		std::cin >> choice;
 
-		switch (playAgain(answ))
+		switch (playAgain(choice))
 		{
 		case 1: start(name, matrix, answer, size); break;
 		case 0: std::cout << "You chose to end the game!"; return; break;
-		case -1: std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives); break;
+		case -1: std::cout << "Incorrect input!"; play(name, matrix, answer, size, lives, levelVersion); break;
 		}
 		
 		print(matrix, size);
@@ -378,14 +431,14 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 
 	if (i == -1)//player decides to quit the level
 	{
-		quit(name, matrix, answer, size, lives);	
+		quit(name, matrix, answer, size, lives, levelVersion);
 	}
 		
 	std::cin >> j;
 
 	if (j == -1)
 	{
-		quit(name, matrix, answer, size, lives);
+		quit(name, matrix, answer, size, lives, levelVersion);
 	}
 
 	if (!isValidIndex(i + HINTSCOUNT, j + HINTSCOUNT, size))
@@ -409,104 +462,73 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 		}
 		else
 		{
-			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = 0; // const
+			matrix[i + HINTSCOUNT][j + HINTSCOUNT] = 0; 
 			std::cout << "Incorrect! The cell is empty. Lives left: " << --lives << std::endl;
 		}
 	}
 
-	play(name, matrix, answer, size, lives);
+	play(name, matrix, answer, size, lives, levelVersion);
 }
-int playerlives(char* playersname)
-{
-	char buff[MAXINPUT];
-	int lives = 0;
-	std::ifstream inputfile;
-	inputfile.open("Names.txt");
-	if (inputfile.is_open())
-	{
-		while (inputfile >> buff)
-		{
-			if (found(playersname, buff))
-			{
-				inputfile >> buff;
-				inputfile >> lives;
-				inputfile.close();
-				return lives;
-			}
-		}
-	}
-	else
-	{
-		std::cout << "coudn't open the file.\n";
-	}
-	inputfile.close();
-	return 0;
-}
-int playerLevelContinue(char* playersName)
-{
-	char buff[MAXINPUT];
-	int level = 0;
-	std::ifstream inputFile;
-	inputFile.open("Names.txt");
-	if (inputFile.is_open())
-	{
-		while (inputFile >> buff)
-		{
-			if (found(playersName, buff))
-			{
-				inputFile >> buff;
-				inputFile >> buff;
-				inputFile >> level;
-				inputFile.close();
-				return level;
-			}
-		}
-	}
-	else
-	{
-		std::cout << "Coudn't open the file.\n";
-	}
-	inputFile.close();
-	return 0;
-}
+
+
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size)//the function is used every time the player wants to start a level
 {
 	int level = 1;
 	char lv;
 	int lives = 3;
-	std::cout << "Which level?\n";
-	
-	int maxLevel = searchForPlayerLevel(name);
-	std::cin >> lv;
-	level = lv - '0';
+	std::cout << "Do you want to continue[C] your last saved level or start a new one[N]? [C/N]\n";
 
-	if (!isValidLevel(level))
+	char choice;
+	std::cin >> choice;
+
+	if (choice == 'C' || choice == 'c')
 	{
-		std::cout << "There is no such level!\n";
+		 lives  = readProgress(name, matrix, answer, size);
+	}
+	else if (choice == 'N' || choice == 'n')
+	{
+		std::cout << "Which level?\n";
+
+		int maxLevel = searchForPlayerLevel(name);
+		std::cin >> level;
+
+		if (!isValidLevel(level))
+		{
+			std::cout << "There is no such level!\n";
+			std::cin.ignore(MAXINPUT, '\n');
+			start(name, matrix, answer, size);
+		}
+		else if (level > maxLevel)
+		{
+			std::cout << "Your level: " << maxLevel << "\nTrying to reach level: " << level << "\nYou cant reach that level!\n";
+			start(name, matrix, answer, size);
+		}
+
+		size = CELLS + level;
+
+		srand(time(nullptr));//changing the seed if rand with time to get different numbers
+		int version = rand() % 2;//gennerating 0 or 1
+
+		level = level * 10 + version;
+
+		create(name, matrix, size, level);//the matrix that the player is gonna use
+		create(name, answer, size, level * 10);//the matrix filled with the right answers
+
+	}
+	else
+	{
+		std::cin.clear();
 		std::cin.ignore(MAXINPUT, '\n');
-		start(name, matrix, answer, size);
-	}
-	else if (level > maxLevel)
-	{
-		std::cout << "Your level: " << maxLevel << "\nTrying to reach level: " << level << "\nYou cant reach that level!\n";
+		std::cout << "Incorrect input!\n";
 		start(name, matrix, answer, size);
 	}
 	
-	size = CELLS + level;
-
-	srand(time(nullptr));//changing the seed if rand with time to get different numbers
-	int version = rand() % 2;//gennerating 0 or 1
-
-	level = level * 10 + version;
-	
-	create(name, matrix, size, level);//the matrix that the player is gonna use
-	create(name,answer, size, level * 10);//the matrix filled with the right answers
-
-	play(name, matrix, answer, size, lives);
+	play(name, matrix, answer, size, lives, level);
 }
 
 int main()
 {
+	
 	char playersName[MAXINPUT] = "";
 	int matrix[MAXSIZELEVEL][MAXSIZELEVEL] = {};
 	int answer[MAXSIZELEVEL][MAXSIZELEVEL] = {};
