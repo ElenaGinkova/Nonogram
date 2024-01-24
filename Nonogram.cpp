@@ -30,6 +30,7 @@ const int MAXINPUT = 300;
 
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size);
 void create(char* name, int matrix[][MAXSIZELEVEL], int size, int toOpen);
+void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], int size, int lives, int levelVersion);
 int searchForPlayerLevel(char* playersName)//returns the level of the player
 {
 	char name[MAXINPUT];
@@ -244,7 +245,7 @@ bool isValidIndex(const int i, const int j,  int size)
 {
 	return (i > 1 && j > 1 && i < size && j < size);
 }
-bool isFilled(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size)
+bool isFilled(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size)//if the cell has already been assigned with a value
 {
 	for (int i = 0; i < size - HINTSCOUNT; i++)
 	{
@@ -306,7 +307,6 @@ void checkForFullColumn(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], 
 		}
 	}
 }
-void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int lives, int levelVersion);
 
 int playAgain(char answer)
 {
@@ -314,7 +314,7 @@ int playAgain(char answer)
 	else if (answer == 'N' || answer == 'n') return 0;
 	else return -1;
 }
-void finishedLevel(char* namePlayer)
+void finishedLevel(char* namePlayer)// when a player completes successfully a level the function increases his level to the next one
 {
 	const int FILESIZE = 600;
 	std::ifstream inputFile;
@@ -472,7 +472,7 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 	play(name, matrix, answer, size, lives, levelVersion);
 }
 
-bool emptyFile(char* name)
+bool emptyFile(char* name)//if the player hasnt saved any game yet
 {
 	std::ifstream inFile;
 	inFile.open(name);
@@ -565,4 +565,5 @@ int main()
 	}
 
 	start(playersName, matrix, answer, MAXSIZELEVEL);
+	return 0;
 }
