@@ -19,11 +19,13 @@
 #include "NewPlayer.h"
 #include "StrFunctions.h"
 
-const size_t MAXSIZELEVEL = 11;
-const size_t CELLS = 6;
-const int HINTSCOUNT = 2;
 const int EMPTY = -1;
 const int FILLED = 1;
+const int QUIT = -1;
+const int HINTSCOUNT = 2;
+const unsigned LEVELS = 5;
+const size_t CELLS = 6;
+const size_t MAXSIZELEVEL = 11;
 const int MAXINPUT = 300;
 
 void start(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size);
@@ -218,7 +220,7 @@ void create(char* name, int matrix[][MAXSIZELEVEL],  int size, int toOpen)//crea
 			for (int j = size; j < MAXSIZELEVEL; j++)
 			{
 				if(matrix[i][j] == 0)
-				matrix[i][j] = -1;
+				matrix[i][j] = EMPTY;
 			}
 		}
 		for (int i = size; i < MAXSIZELEVEL; i++)
@@ -226,7 +228,7 @@ void create(char* name, int matrix[][MAXSIZELEVEL],  int size, int toOpen)//crea
 			for (int j = 0; j < MAXSIZELEVEL; j++)
 			{
 				if (matrix[i][j] == 0)
-					matrix[i][j] = -1;
+					matrix[i][j] = EMPTY;
 			}
 		}
 		
@@ -256,7 +258,7 @@ bool isFilled(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size)
 }
 bool isValidLevel(int a)//there are only 5 levels
 {
-	return (a > 0 && a < 6);
+	return (a > 0 && a < LEVELS + 1);
 }
 void checkForFullRow(int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int rowIndx)//if all filleed cells have been found then filling the empty ones in this row
 {
@@ -401,7 +403,7 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 		char choice;
 		int reachedLevel = searchForPlayerLevel(name) + 1;
 
-		if (reachedLevel != 6)//there are only 5 levels checking if the player have went trough all of them and if not then increasinf the level
+		if (reachedLevel != LEVELS + 1)//there are only 5 levels checking if the player have went trough all of them and if not then increasinf the level
 		{
 			finishedLevel(name);
 		}
@@ -429,14 +431,14 @@ void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  i
 	print(matrix, size);
 	std::cin >> i;
 
-	if (i == -1)//player decides to quit the level
+	if (i == QUIT)//player decides to quit the level
 	{
 		quit(name, matrix, answer, size, lives, levelVersion);
 	}
 		
 	std::cin >> j;
 
-	if (j == -1)
+	if (j == QUIT)
 	{
 		quit(name, matrix, answer, size, lives, levelVersion);
 	}
