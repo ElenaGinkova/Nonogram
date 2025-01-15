@@ -379,6 +379,7 @@ void quit(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL], in
 		quit(name, matrix, answer, size, lives, levelVersion);
 	}
 }
+//this should be separated into smaller funcs...
 void play(char* name, int matrix[][MAXSIZELEVEL], int answer[][MAXSIZELEVEL],  int size, int lives, int levelVersion)//the function is used while gameplay in a certain level 
 {
 	
